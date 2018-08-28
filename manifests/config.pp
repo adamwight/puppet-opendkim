@@ -60,12 +60,14 @@ class opendkim::config inherits opendkim {
 
   }
 
-  file { $opendkim::sysconfigfile:
-    ensure  => 'file',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    content => template('opendkim/sysconfig/opendkim.erb'),
+  if ($opendkim::sysconfigfile != false) {
+    file { $opendkim::sysconfigfile:
+      ensure  => 'file',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0640',
+      content => template('opendkim/sysconfig/opendkim.erb'),
+    }
   }
 
   $piddir = dirname($opendkim::pidfile )
@@ -161,25 +163,28 @@ class opendkim::config inherits opendkim {
       mode    => '0600',
     }
 
-
-    file { "${opendkim::configdir}/keys/${key['domain']}/${key['selector']}":
-      ensure  => 'file',
-      content => $key['privatekey'],
-      owner   => $opendkim::user,
-      group   => $opendkim::group,
-      mode    => '0600',
+    if $key['privatekey'] {
+      file { "${opendkim::configdir}/keys/${key['domain']}/${key['selector']}":
+        ensure  => 'file',
+        content => $key['privatekey'],
+        owner   => $opendkim::user,
+        group   => $opendkim::group,
+        mode    => '0600',
+      }
     }
 
-    $selector = $key['selector']
-    $domain = $key['domain']
-    $publickey = $key['publickey']
+    if $key['publickey'] {
+      $selector = $key['selector']
+      $domain = $key['domain']
+      $publickey = $key['publickey']
 
-    file { "${opendkim::configdir}/keys/${key['domain']}/${key['selector']}.txt":
-      ensure  => 'file',
-      content => template('opendkim/public-rsa-key.erb'),
-      owner   => $opendkim::user,
-      group   => $opendkim::group,
-      mode    => '0600',
+      file { "${opendkim::configdir}/keys/${key['domain']}/${key['selector']}.txt":
+        ensure  => 'file',
+        content => template('opendkim/public-rsa-key.erb'),
+        owner   => $opendkim::user,
+        group   => $opendkim::group,
+        mode    => '0600',
+      }
     }
 
   }

@@ -4,7 +4,6 @@ class opendkim::params {
   $uid = -1
   $gid = -1
 
-  $configfile  = '/etc/opendkim.conf'
   $pidfile = '/var/run/opendkim/opendkim.pid'
   $homedir = '/var/run/opendkim'
   $mode = 'sv'
@@ -25,16 +24,25 @@ class opendkim::params {
 
   $service_enable    = true
   $service_ensure    = 'running'
-  $service_name      = 'opendkim'
 
   case $::osfamily {
     'Debian': {
+      $configfile       = '/etc/opendkim.conf'
       $sysconfigfile    = '/etc/default/opendkim'
       $configdir        = '/etc/opendkim'
+      $service_name     = 'opendkim'
     }
     'Redhat': {
+      $configfile       = '/etc/opendkim.conf'
       $sysconfigfile    = '/etc/sysconfig/opendkim'
       $configdir        = '/etc/opendkim'
+      $service_name     = 'opendkim'
+    }
+    'FreeBSD': {
+      $configfile       = '/usr/local/etc/mail/opendkim.conf'
+      $sysconfigfile    = false
+      $configdir        = '/usr/local/etc/mail/'
+      $service_name     = 'milter-opendkim'
     }
     default: {
       fail("${::operatingsystem} is not supported by this module.")
